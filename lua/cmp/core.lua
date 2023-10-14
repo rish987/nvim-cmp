@@ -272,6 +272,7 @@ end
 ---Invoke completion
 ---@param ctx cmp.Context
 core.complete = function(self, ctx)
+  print"COMPLETE"
   if not api.is_suitable_mode() then
     return
   end
@@ -296,6 +297,7 @@ core.complete = function(self, ctx)
         end
       end
     end)(s)
+    print("CALLING", s.name)
     s:complete(ctx, callback)
   end
 

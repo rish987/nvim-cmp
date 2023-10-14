@@ -276,6 +276,7 @@ end
 ---@return boolean? Return true if not trigger completion.
 source.complete = function(self, ctx, callback)
   local offset = ctx:get_offset(self:get_keyword_pattern())
+  print("  OFFSET:", offset)
 
   -- NOTE: This implementation is nvim-cmp specific.
   -- We trigger new completion after core.confirm but we check only the symbol trigger_character in this case.
@@ -298,15 +299,34 @@ source.complete = function(self, ctx, callback)
       triggerCharacter = before_char,
     }
   elseif ctx:get_reason() ~= types.cmp.ContextReason.TriggerOnly then
+
+-- params:  false -1 89 1
+-- TWO -1 -1 86
+
+-- params:  false 89 90 3
+-- THREE 86 86 86
+
+--
+
+-- params:  false -1 90 1
+-- TWO -1 -1 87
+
+-- params:  true 90 91 3
+-- ONE
     if offset < ctx.cursor.col and self:get_keyword_length() <= (ctx.cursor.col - offset) then
+      print("params: ", self.incomplete, self.context.cursor.col, ctx.cursor.col, self.status)
       if self.incomplete and self.context.cursor.col ~= ctx.cursor.col and self.status ~= source.SourceStatus.FETCHING then
+        print"ONE"
         completion_context = {
           triggerKind = types.lsp.CompletionTriggerKind.TriggerForIncompleteCompletions,
         }
       elseif not vim.tbl_contains({ self.request_offset, self.offset }, offset) then
+        print("TWO", self.request_offset, self.offset, offset)
         completion_context = {
           triggerKind = types.lsp.CompletionTriggerKind.Invoked,
         }
+      else
+        print("THREE", self.request_offset, self.offset, offset)
       end
     else
       self:reset() -- Should clear current completion if the TriggerKind isn't TriggerCharacter or Manual and keyword length does not enough.
